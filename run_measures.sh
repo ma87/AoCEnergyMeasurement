@@ -21,7 +21,7 @@ for year in */ ; do
             ./build.sh $day > /dev/null 2>&1
             cannot_build=$?
             if [[ "$cannot_build" -eq "0" ]]; then
-              echo '"'"$USER"'"','"'"$LANGUAGE"'"',"$day","$(energy_measurement ./run.sh $day)" >> $output_folder/measures.csv
+              echo '"'"$USER"'"','"'"$LANGUAGE"'"',"$year","$day","$(energy_measurement ./run.sh $day)" >> $output_folder/measures.csv
             fi
           done
         fi
