@@ -17,11 +17,13 @@ for year in */ ; do
           USER=$(grep "^USER=" Info.txt | cut -d'=' -f2-)
           DAYS=$(grep "^DAYS=" Info.txt | cut -d'=' -f2-)
           LIST_DAYS=$(echo $DAYS | cut -d',' --output-delimiter=$'\n' -f1-)
+          HASH_COMMIT=$(git log -n 1 --pretty=format:%h -- .)
+          TIME_COMMIT=$(git log -n 1 --pretty=format:%ai -- .)
           for day in $LIST_DAYS ; do
             ./build.sh $day > /dev/null 2>&1
             cannot_build=$?
             if [[ "$cannot_build" -eq "0" ]]; then
-              echo '"'"$USER"'"','"'"$LANGUAGE"'"',"$year","$day","$(energy_measurement ./run.sh $day)" >> $output_folder/measures.csv
+              echo '"'"$HASH_COMMIT"'"','"'"$TIME_COMMIT"'"','"'"$USER"'"','"'"$LANGUAGE"'"',"$year","$day","$(energy_measurement ./run.sh $day)" >> $output_folder/measures.csv
             fi
           done
         fi
