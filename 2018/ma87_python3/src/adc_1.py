@@ -6,7 +6,7 @@ if len(sys.argv) <= 1:
 filename = sys.argv[1]
 current_frequency = 0
 first_repeated_frequency_found = False
-visited_frequencies = [0]
+visited_frequencies = {0}
 current_frequencies = []
 
 with open(filename, 'r') as f:
@@ -24,7 +24,7 @@ with open(filename, 'r') as f:
                 first_repeated_frequency = current_frequency
                 first_repeated_frequency_found = True
             else:
-                visited_frequencies.append(current_frequency)
+                visited_frequencies.add(current_frequency)
         current_frequencies.append(current_frequency)
 
 print('solution 1: ' + str(current_frequencies[0]))
