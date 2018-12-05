@@ -5,5 +5,6 @@ set -e
 DAY=$1
 
 cd src/day-$DAY
-./part1
-./part2
+for src in $(ls *.c); do
+    ./${src%.c}
+done

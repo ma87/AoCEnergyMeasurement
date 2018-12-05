@@ -2,6 +2,7 @@
 
 DAY=$1
 
-# Nothing to do for python
-gcc -o src/day-$DAY/part1 src/day-$DAY/part1.c
-gcc -o src/day-$DAY/part2 src/day-$DAY/part2.c
+cd src/day-$DAY
+for src in $(ls *.c); do
+    gcc -o ${src%.c} $src
+done
