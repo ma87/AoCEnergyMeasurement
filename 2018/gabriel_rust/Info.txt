@@ -1,0 +1,3 @@
+DAYS=1
+LANGUAGE=rust
+USER=gabriel
