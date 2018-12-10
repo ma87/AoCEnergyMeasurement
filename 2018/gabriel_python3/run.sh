@@ -5,5 +5,5 @@ set -e
 DAY=$1
 
 cd src/day$DAY
-./$DAY
-./${DAY}.2
+./$DAY.py
+./${DAY}.2.py

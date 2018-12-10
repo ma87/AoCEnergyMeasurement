@@ -6,4 +6,6 @@ DAY=$1
 
 cd src/day$DAY
 ./$DAY
-#./${DAY}.2
+if [ -x ${DAY}-2 ] ; then
+	./${DAY}-2
+fi
