@@ -1,0 +1,124 @@
+#include <stdlib.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <inttypes.h>
+#include <string.h>
+#include <ctype.h>
+
+typedef struct recipe_t {
+    struct recipe_t *prev;
+    struct recipe_t *next;
+
+    int score;
+} recipe_t;
+
+static inline recipe_t *recipe_new(int score)
+{
+    recipe_t *e = malloc(sizeof(*e));
+
+    e->score = score;
+    e->prev = e;
+    e->next = e;
+
+    return e;
+}
+
+static inline recipe_t *recipe_lookup(recipe_t *circle, int location)
+{
+    if (location == 0) {
+        return circle;
+    }
+    if (location < 0) {
+        return recipe_lookup(circle->prev, location + 1);
+    }
+    return recipe_lookup(circle->next, location - 1);
+}
+
+static inline recipe_t *recipe_insert(recipe_t *circle, recipe_t *e)
+{
+    recipe_t *right = circle->next;
+
+    circle->next = e;
+    e->prev = circle;
+
+    right->prev = e;
+    e->next = right;
+
+    return e;
+}
+
+#define INPUT  330121
+
+static inline int recipe_check_pattern(recipe_t *last, int pattern)
+{
+    if (pattern == 0) {
+        return 1;
+    }
+    if (last->score == pattern % 10) {
+        return recipe_check_pattern(last->prev, pattern / 10);
+    }
+    return 0;
+}
+
+static int part2_found;
+static int part1_found;
+
+static inline void recipe_add(recipe_t *start, int score, int *length)
+{
+    recipe_insert(start->prev, recipe_new(score));
+    *length += 1;
+
+    if (*length > 6 && !part2_found) {
+        if (recipe_check_pattern(start->prev, INPUT)) {
+            printf("part2: %d\n", *length - 6);
+            part2_found = 1;
+            if (part1_found) {
+                exit(0);
+            }
+        }
+    }
+    if (*length >= INPUT + 10 && !part1_found) {
+        recipe_t *l10 = recipe_lookup(start, -10);
+
+        printf("part1: ");
+        while (l10 != start) {
+            printf("%d", l10->score);
+            l10 = l10->next;
+        }
+        printf("\n");
+        part1_found = 1;
+        if (part2_found) {
+            exit(0);
+        }
+    }
+}
+
+int main(int argc, char **argv)
+{
+    recipe_t *start = recipe_new(3);
+    int length = 2;
+    recipe_t *elf1, *elf2;
+
+    recipe_insert(start, recipe_new(7));
+
+    elf1 = start;
+    elf2 = start->next;
+
+    for (;;) {
+        int combined = elf1->score + elf2->score;
+
+        if (combined >= 10) {
+            recipe_add(start, combined / 10, &length);
+        }
+
+        recipe_add(start, combined % 10, &length);
+
+        elf1 = recipe_lookup(elf1, elf1->score + 1);
+        elf2 = recipe_lookup(elf2, elf2->score + 1);
+    }
+
+    return 0;
+}
