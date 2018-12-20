@@ -29,7 +29,7 @@ def puzzle(serial_number):
     grid = [0] * 300
     for i in range(300):
         grid[i] = [0] * 300
-    
+
     for x in range(300):
         for y in range(300):
             grid[x][y] = power_cell(serial_number, x + 1, y + 1)
@@ -39,7 +39,7 @@ def puzzle(serial_number):
     max_size = None
     for x in range(0, 300):
         for y in range(0, 300):
-            for size in range(1, 25):  # score decreases after 25
+            for size in range(1, 300):  # score decreases after 25
                 try:
                     tmp = area_power(grid, x, y, size)
                     if tmp > max_power:
@@ -49,7 +49,7 @@ def puzzle(serial_number):
                 except IndexError:
                     break
             # print('DBG', x, y, max_power, max_coordinates, max_size)
-    
+
     return max_power, max_coordinates, max_size
 
 # print(18, puzzle(18))  # (113, (90, 269), 16)
