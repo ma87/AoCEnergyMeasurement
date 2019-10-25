@@ -1,3 +1,4 @@
+file = """
 -2
 -3
 +4
@@ -993,4 +994,20 @@
 -18
 -10
 -9
--81046
+-81046""".strip().split('\n')
+
+
+def main(file):
+    lst = list(map(int, file))
+    print("1:", sum(lst))
+    x = set()
+    c = 0
+    while True:
+        for i in lst:
+            c += i
+            if c in x:
+                return c
+            x.add(c)
+
+
+print("2:", main(file))
