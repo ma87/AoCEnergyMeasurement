@@ -3,7 +3,7 @@
 ## HELPER
 show_help()
 {
-  echo "usage: ./run_mcv_measures.sh -p path_to_mcv_energy_folder [-d 1,4] [-l python3] [-u ma87] [-y 2018]"
+  echo "usage: ./run_mcv_measures.sh [-b] -p path_to_mcv_energy_folder [-d 1,4] [-l python3] [-u ma87] [-y 2018]"
 }
 
 ## global variables
@@ -16,11 +16,13 @@ USER=""
 year="2018"
 forced_option=0
 path_mcv_energy="../mcv_energy_measurement"
-
+use_battery_measurement=0
+number_iterations=10
+sleep_time=10
 
 ## Parse arguments
 
-while getopts "h?vu:d:l:p:y:" opt; do
+while getopts "h?bvs:i:u:d:l:p:y:" opt; do
     case "$opt" in
     h|\?)
         show_help
@@ -32,11 +34,17 @@ while getopts "h?vu:d:l:p:y:" opt; do
         ;;
     u)  forced_user=$OPTARG
         ;;
+    i)  number_iterations=$OPTARG
+        ;;
+    s)  sleep_time=$OPTARG
+        ;;
     d)  forced_days=$OPTARG
         ;;
     l)  forced_language=$OPTARG
         ;;
     p)  path_mcv_energy=$OPTARG
+        ;;
+    b)  use_battery_measurement=1
         ;;
     esac
 done
@@ -85,9 +93,9 @@ for p in $(find . -name Info.txt) ; do
           ./build.sh $day > /dev/null 2>&1
           cannot_build=$?
           if [[ "$cannot_build" -eq "0" ]]; then
-            for i in {1..10}; do
-              measure_energy $results_filename "./run.sh $day" $keys $values
-              sleep 20
+            for (( u=0; u<${number_iterations}; u++ )) ; do
+              measure_energy $use_battery_measurement $results_filename "./run.sh $day" $keys $values
+              sleep $sleep_time
             done
           fi
         fi
