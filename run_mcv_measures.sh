@@ -54,6 +54,7 @@ done
 
 root_dir=$(pwd)/$year
 results_filename="$root_dir/$(date +%Y%m%d%H%M%S)_measure_${year}_${forced_user}_${forced_language}.csv" 
+CPU_MODEL_NAME="\"$( lscpu | grep "Model name:" | sed -r 's/Model name:\s{1,}//g' )\""
 
 source "$path_mcv_energy"/measure_energy.sh
 
@@ -84,20 +85,19 @@ for p in $(find . -name Info.txt) ; do
         TESTED_DAYS=$LIST_DAYS
       fi
 
-      keys=("USER" "LANGUAGE" "DAY")
-      for day in ${TESTED_DAYS[@]} ; do
-        if [[ $verbose -eq "1" ]]; then
-          echo "p = $p -> USER = $USER LANGUAGE = $LANGUAGE DAY = $day YEAR = $year results filename = $results_filename"
-        else
-          values=("$USER" "$LANGUAGE" "$day")
-          ./build.sh $day > /dev/null 2>&1
-          cannot_build=$?
-          if [[ "$cannot_build" -eq "0" ]]; then
-            for (( u=0; u<${number_iterations}; u++ )) ; do
-              measure_energy $use_battery_measurement $results_filename "./run.sh $day" $keys $values
-              sleep $sleep_time
-            done
+      keys=("USER" "LANGUAGE" "DAY" "CPU_MODEL_NAME")
+      for DAY in ${TESTED_DAYS[@]} ; do
+        ./build.sh $DAY > /dev/null 2>&1
+        cannot_build=$?
+
+        if [[ "$cannot_build" -eq "0" ]]; then
+          if [[ $verbose -eq "1" ]]; then
+            echo "Measuring project file = $p USER = $USER LANGUAGE = $LANGUAGE DAY = $DAY"
           fi
+          for (( u=0; u<${number_iterations}; u++ )) ; do
+            measure_energy $use_battery_measurement $results_filename "./run.sh $DAY" $keys
+            sleep $sleep_time
+          done
         fi
       done
     fi
