@@ -3,7 +3,18 @@
 ## HELPER
 show_help()
 {
-  echo "usage: ./run_mcv_measures.sh [-b] -p path_to_mcv_energy_folder [-d 1,4] [-l python3] [-u ma87] [-y 2018]"
+  echo "usage: ./run_mcv_measures.sh -p path_to_mcv_energy_folder [-d 1,4] [-l python3] [-u ma87] [-y 2018] [-v] [-b] [-i 10] [-s 10]"
+  echo "available options are:
+              -p gives the path to mcv_energy_measurement folder where https://github.com/ma87/mcv_energy_measurement has been cloned
+              -d gives the list of days that will be measured
+              -l gives the programming language that will be tested
+              -u gives the user to be measured
+              -y gives the year
+              -v enables verbose mode
+              -b enables battery mode measurement: powertop will be used instead of turbostat
+              -i gives the number of measures for each project
+              -s gives the sleep time between measures
+       "
 }
 
 ## global variables
@@ -56,19 +67,26 @@ root_dir=$(pwd)/$year
 results_filename="$root_dir/$(date +%Y%m%d%H%M%S)_measure_${year}_${forced_user}_${forced_language}.csv" 
 CPU_MODEL_NAME="\"$( lscpu | grep "Model name:" | sed -r 's/Model name:\s{1,}//g' )\""
 
+## Include mcv measure energy consumption script
 source "$path_mcv_energy"/measure_energy.sh
 
 cd $root_dir
 
+## Loop over all Info.txt files in root_dir to parse language and available days for a project
 for p in $(find . -name Info.txt) ; do
+  # place current directory to project directory to be able to build and run
   cd $(dirname $p)
+
+  # parse information of Info.txt file
   LANGUAGE=$(grep "^LANGUAGE=" Info.txt | cut -d'=' -f2-)
   USER=$(grep "^USER=" Info.txt | cut -d'=' -f2-)
   DAYS=$(grep "^DAYS=" Info.txt | cut -d'=' -f2-)
   LIST_DAYS=$(echo $DAYS | cut -d',' --output-delimiter=$'\n' -f1-)
 
+  # Test if project is included in input options
   if [[ -z $forced_user || $forced_user == $USER ]]; then
     if [[ -z $forced_language || $forced_language == $LANGUAGE ]]; then
+      # If list of days is specified, we verify that each input day is available in the project
       if [[ ! -z $forced_days ]]; then
         LIST_FORCED_DAYS=$(echo $forced_days | cut -d',' --output-delimiter=$'\n' -f1-)
         TESTED_DAYS=()
@@ -81,12 +99,17 @@ for p in $(find . -name Info.txt) ; do
               fi
           done
         done
+      # If no list of days is specified, we test all the available days
       else
         TESTED_DAYS=$LIST_DAYS
       fi
 
+      # Specific entries for the output results: USER is name of developer, LANGUAGE the programming language used to solve problem
+      # DAY is the measured day, CPU_MODEL_NAME is used to compare measures between different cpus
       keys=("USER" "LANGUAGE" "DAY" "CPU_MODEL_NAME")
       for DAY in ${TESTED_DAYS[@]} ; do
+
+        # Try to build the project
         ./build.sh $DAY > /dev/null 2>&1
         cannot_build=$?
 
@@ -98,6 +121,8 @@ for p in $(find . -name Info.txt) ; do
             measure_energy $use_battery_measurement $results_filename "./run.sh $DAY" $keys
             sleep $sleep_time
           done
+        else
+          echo "build failed for project file = $p USER = $USER LANGUAGE = $LANGUAGE DAY = $DAY"
         fi
       done
     fi
