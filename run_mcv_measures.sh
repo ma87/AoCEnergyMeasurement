@@ -106,7 +106,7 @@ for p in $(find . -name Info.txt) ; do
 
       # Specific entries for the output results: USER is name of developer, LANGUAGE the programming language used to solve problem
       # DAY is the measured day, CPU_MODEL_NAME is used to compare measures between different cpus
-      keys=("USER" "LANGUAGE" "DAY" "CPU_MODEL_NAME")
+      input_keys="USER LANGUAGE DAY CPU_MODEL_NAME"
       for DAY in ${TESTED_DAYS[@]} ; do
 
         # Try to build the project
@@ -118,7 +118,7 @@ for p in $(find . -name Info.txt) ; do
             echo "Measuring project file = $p USER = $USER LANGUAGE = $LANGUAGE DAY = $DAY"
           fi
           for (( u=0; u<${number_iterations}; u++ )) ; do
-            measure_energy $use_battery_measurement $results_filename "./run.sh $DAY" $keys
+            measure_energy $use_battery_measurement $results_filename "./run.sh $DAY" $input_keys
             sleep $sleep_time
           done
         else
