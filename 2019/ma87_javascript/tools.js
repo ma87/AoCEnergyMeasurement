@@ -5,7 +5,7 @@ const { readFileSync } = require("fs");
   .trim()
   .split("\n")
   .map(n => parseInt(n));*/
-exports.parseInput = function(fileInput, parserFunc, outputParser)
+exports.parseInput = function(fileInput, parserFunc)
 {
 	return readFileSync(path.resolve(__dirname, fileInput), "utf8")
   .trim()
